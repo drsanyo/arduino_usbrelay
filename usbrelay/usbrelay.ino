@@ -1,4 +1,7 @@
 #include <stdlib.h>
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h> 
+
 
 #include "TimerOne.h"
 #include "D:\Development\Arduino\USB Relay\usbrelay\constants.h"
@@ -8,6 +11,7 @@ char incomingData[DATA_PROTOCOL_LENGHT];
 int watchDogCnt = 0;
 boolean watchdogTimerState = false;
 
+LiquidCrystal_I2C lcd(0x3F,16,2); // LCD ekrano adresas ir matmenys   
 
 /*****************************************************************************************/
 // set device ON
@@ -40,14 +44,21 @@ void setAllDevicesOff(){
 /*****************************************************************************************/
 void getSystemState() {
   char sysState[6] = "";
-  sysState[0] = digitalRead(PIN_REL_1)+48;8
+  sysState[0] = digitalRead(PIN_REL_1)+48;
   sysState[1] = digitalRead(PIN_REL_2)+48;
   sysState[2] = digitalRead(PIN_REL_3)+48;
   sysState[3] = digitalRead(PIN_REL_4)+48;
   sysState[4] = watchdogTimerState+48;
   
-  Serial.print("SystemState: ");
-  Serial.println(sysState);
+  lcd.clear();
+  lcd.setCursor(0,0); 
+  //Spausdinamos žinutės 
+  lcd.print("SystemState: "); 
+  lcd.setCursor(0,1); 
+  lcd.print(sysState); 
+  
+  //Serial.print("SystemState: ");
+  //Serial.println(sysState);
   
 }
 
@@ -117,6 +128,7 @@ void watchdogTimerCallbackProc(){
   if (watchDogCnt >= WATCH_DOG_TIME){
     watchDogCnt = 0;
     setAllDevicesOff();
+    watchdogTimerDisable();
   }
 }
 
@@ -125,8 +137,16 @@ void watchdogTimerCallbackProc(){
 // action Set Device to On
 /*****************************************************************************************/
 void actionSetDeviceOn(String devNr){
+  lcd.clear();
+  lcd.setCursor(0,0); 
+  //Spausdinamos žinutės 
+  lcd.print("SetDeviceOn:"); 
+  lcd.setCursor(0,1); 
+  lcd.print(devNr);
+  /*
   Serial.print("actionSetDeviceOn: ");
   Serial.println(devNr);
+  */
   setDeviceOn(atoi(devNr.c_str()));
 }
 
@@ -134,8 +154,16 @@ void actionSetDeviceOn(String devNr){
 // action Set Device to Off
 /*****************************************************************************************/
 void actionSetDeviceOff(String devNr){
-  Serial.print("actionSetDeviceOff: ");
+  lcd.clear();
+  lcd.setCursor(0,0); 
+  //Spausdinamos žinutės 
+  lcd.print("SetDeviceOff:"); 
+  lcd.setCursor(0,1); 
+  lcd.print(devNr);
+  /*
+  Serial.print("actionSetDeviceOn: ");
   Serial.println(devNr);
+  */
   setDeviceOff(atoi(devNr.c_str()));
 }
 
@@ -145,9 +173,21 @@ void actionSetDeviceOff(String devNr){
 // do watchdog timer action
 /*****************************************************************************************/
 void actionSetWatchdogState(char action){
+  lcd.clear();
+  lcd.setCursor(0,0); 
+  //Spausdinamos žinutės 
+  lcd.print("SetWatchdogState"); 
+  lcd.setCursor(0,1); 
+  lcd.print(action);
+  /*
+  Serial.print("actionSetDeviceOn: ");
+  Serial.println(devNr);
+  */
+  
+  /*
   Serial.print("actionSetWatchdogState: ");
   Serial.println(action);
-  
+  */
   if (action == SET_WATCHDOG_ENABLE) {
     watchdogTimerEnable();
   } else {
@@ -160,7 +200,7 @@ void actionSetWatchdogState(char action){
 // do get system state action
 /*****************************************************************************************/
 void actionGetSystemState(){
-  Serial.println("actionGetSystemState");
+  //Serial.println("actionGetSystemState");
   getSystemState();
 }
 
@@ -198,6 +238,18 @@ void setup() {
     watchdogTimerCallbackProc, 
     TIMER_ONE_SEC_TIME,
     false);
+    
+    
+  // Paleidžiamas LCD ekranas 
+  lcd.init();   
+  //Įjungiamas apšvietimas 40
+  lcd.backlight();  
+  
+  //Perkeliamas kursorius 
+  lcd.setCursor(0,0); 
+  //Spausdinamos žinutės 
+  lcd.print("Welcome"); 
+  lcd.blink();
 }
 
 
