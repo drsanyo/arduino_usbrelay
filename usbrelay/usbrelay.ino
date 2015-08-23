@@ -2,10 +2,19 @@
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h> 
 
-
 #include "TimerOne.h"
 #include "D:\Development\Arduino\USB Relay\usbrelay\constants.h"
 
+#include <i2ckeypad.h>
+
+#define ROWS 4
+#define COLS 4
+
+// With A0, A1 and A2 of PCF8574 to ground I2C address is 0x20
+#define PCF8574_ADDR 0x20
+
+
+i2ckeypad kpd = i2ckeypad(PCF8574_ADDR, ROWS, COLS);
 
 char incomingData[DATA_PROTOCOL_LENGHT];
 int watchDogCnt = 0;
@@ -249,7 +258,10 @@ void setup() {
   lcd.setCursor(0,0); 
   //Spausdinamos žinutės 
   lcd.print("Welcome"); 
-  lcd.blink();
+  //lcd.blink();
+  
+  
+  kpd.init();
 }
 
 
@@ -262,5 +274,16 @@ void loop() {
     watchDogCnt = 0;    
     Serial.readBytesUntil(LF, incomingData, DATA_PROTOCOL_LENGHT);
     doAction(incomingData);
+  }
+  
+  char key = kpd.get_key();
+  if(key != '\0') {
+        //Serial.print(key);
+    lcd.clear();
+    lcd.setCursor(0,0); 
+    //Spausdinamos žinutės 
+    lcd.print("Key:"); 
+    lcd.setCursor(0,1); 
+    lcd.print(key);
   }
 }
