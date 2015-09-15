@@ -218,6 +218,9 @@ void actionGetSystemState(){
 // do an action depending on received char
 /*****************************************************************************************/
 void doAction(char action[]){
+  Serial.println("actionGetSystemState");
+  Serial.print(action[ACTION_CODE_INDEX]);
+  Serial.println(action[ACTION_ARGS_INDEX]);
   
   switch (action[ACTION_CODE_INDEX]) {
     case ACTION_SET_DEVICE_ON: 
